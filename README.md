@@ -5,7 +5,7 @@ Inspired by the shots from the author: https://dribbble.com/yupnguyen
 
 |     Coffee Concept    |  Coin Concept    | Weather Concept
 | ------------------------- |:-----------------------:|:-----------------------:|
-| ![Output sample](https://github.com/NadiKuts/react-native-pull-down/blob/master/examples/resources/coffee_animation.gif)|![Output sample](coin_animation.gif) |![Output sample](weather_animation.gif)|
+| ![Output sample](https://github.com/NadiKuts/react-native-pull-down/blob/master/examples/resources/coffee_animation.gif)|![Output sample](https://github.com/NadiKuts/react-native-pull-down/blob/master/examples/resources/coin_animation.gif) |![Output sample](https://github.com/NadiKuts/react-native-pull-down/blob/master/examples/resources/weather_animation.gif)|
 
 
 ### Instructions
