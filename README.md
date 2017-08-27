@@ -16,17 +16,6 @@ This package aims to fill this gap and provide a 'relatively' easy way to add yo
 ### Example
 The demo app with umbrella animation can be found at `examples/`.
 
-#### Using npm:
-
-```sh
-$ npm install --save react-native-pull-refresh
-```
-
-#### Using yarn:
-
-```sh
-$ yarn add react-native-pull-refresh
-```
 
 ### Installation
 
