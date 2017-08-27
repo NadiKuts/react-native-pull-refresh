@@ -4,7 +4,138 @@ Inspired by the shots from the author: https://dribbble.com/yupnguyen
 
 |     Coffee Concept    |  Coin Concept    | Weather Concept
 | ------------------------- |:-----------------------:|:-----------------------:|
-| ![Output sample](https://github.com/NadiKuts/react-native-pull-down/blob/master/examples/resources/coffee_animation.gif)|![Output sample](https://github.com/NadiKuts/react-native-pull-down/blob/master/examples/resources/coin_animation.gif) |![Output sample](https://github.com/NadiKuts/react-native-pull-down/blob/master/examples/resources/weather_animation.gif)|
+| ![Output sample](https://github.com/NadiKuts/react-native-pull-down/blob/master/examples/SimpleAnimations/resources/coffee_animation.gif)|![Output sample](https://github.com/NadiKuts/react-native-pull-down/blob/master/examples/SimpleAnimations/resources/coin_animation.gif) |![Output sample](https://github.com/NadiKuts/react-native-pull-down/blob/master/examples/SimpleAnimations/resources/weather_animation.gif)|
+
+### Description
+
+Currently, react-native provides RefreshControl out of the box https://facebook.github.io/react-native/docs/refreshcontrol.html 
+However, it is not 'yet' possible to override the animation that runs during refreshing phase. (RefreshControl uses standard circle android animation). 
+
+This package aims to fill this gap and provide a 'relatively' easy way to add your own custom animation. 
+
+### Example
+The demo app with umbrella animation can be found at `examples/`.
+
+#### Using npm:
+
+```sh
+$ npm install --save react-native-pull-refresh
+```
+
+#### Using yarn:
+
+```sh
+$ yarn add react-native-pull-refresh
+```
+
+### Installation
+
+1. Install the package using either: 
+```sh
+$ npm install --save react-native-pull-refresh
+# or
+$ yarn add react-native-pull-refresh
+```
+
+2. Install and link Lottie package (required for actual animation objects):
+```sh
+yarn add lottie-react-native
+# or
+npm i --save lottie-react-native
+
+react-native link lottie-react-native
+```
+
+### Usage
+
+This code is taken from examples/weatherAnimation sample
+
+You can find `< Header />` and `< ScrollItem />` components in the sample folder
+
+```jsx
+import PullToRefresh from 'react-native-pull-refresh';
+
+export default class weatherAnimation extends Component {
+  constructor( ) {
+    super( );
+    this.state = {
+      isRefreshing: false,
+    };
+  }
+
+  onRefresh() {
+    this.setState({isRefreshing: true});
+    
+    // Simulate fetching data from the server
+    setTimeout(() => {
+      this.setState({isRefreshing: false});
+    }, 5000);
+  }
+
+  render() {
+    return (
+      <View style={{flex:1}}>
+        <Header/>
+        <View style={{flex: 7, backgroundColor: '#F8F4FC'}}>
+          <PullToRefresh
+            isRefreshing= {this.state.isRefreshing}
+            onRefresh= {this.onRefresh.bind(this)}
+            animationBackgroundColor = {'#564A63'}
+            pullHeight = {180}
+            contentView = {
+              <ScrollView>
+                <ScrollItem/>
+                <ScrollItem/>
+                <ScrollItem/>
+                <ScrollItem/>
+                <ScrollItem/>
+                <ScrollItem/>
+                <ScrollItem/>
+                <ScrollItem/>
+                <ScrollItem/>
+              </ScrollView>
+            }
+            
+            onPullAnimationSrc ={require('./umbrella_pull.json')}
+            onStartRefreshAnimationSrc ={require('./umbrella_start.json')}
+            onRefreshAnimationSrc = {require('./umbrella_repeat.json')}
+            onEndRefreshAnimationSrc = {require('./umbrella_end.json')}
+          />
+        </View>
+      </View>
+    );
+  }
+}
+```
+
+### Animation Files Format
+Lottie JSON - https://github.com/airbnb/lottie-react-native
+
+Lottie is a mobile library, developed by AirBnB for Android and iOS that parses Adobe After Effects animations exported as JSON with bodymovin and renders them natively on mobile.
+
+Lottie allows to easily use animations in react-native apps. You just need to create an animation in Adobe After Effects and export it with bodymovin addon to AE https://github.com/bodymovin/bodymovin.
+
+You can find file examples in `examples/SimpleAnimations/animations` folder
+
+#### General Props
+
+| Prop | Type | Description |
+|---|---|---|
+|**`isRefreshing`**|`Boolean`|Refresh state set by parent to trigger refresh.|
+|**`pullHeight`**|`Integer`|Pull Distance _Default 180._|
+|**`onRefresh`**|`Function`|Callback after refresh event|
+|**`contentView`**|`Object`|The content: ScrollView or ListView|
+|**`animationBackgroundColor`**|`string`|Background color|
+|**`onScroll`**|`Function`|Custom onScroll event|
+
+#### Animation Source Files Props
+
+| Prop | Description |
+|---|---|---|
+|**`onPullAnimationSrc`**|Animation that runs when scroll view is pulled down|
+|**`onStartRefreshAnimationSrc`**|Animation that runs after view was pulled and released|
+|**`onRefreshAnimationSrc`**|Animation that runs continuously until isRefreshing props is not changed|
+|**`onEndRefreshAnimationSrc`**|Animation that runs after isRefreshing props is changed|
 
 ### Demos
 
@@ -15,48 +146,3 @@ Scan this QR-code with your Expo App.
 ![alt text](https://github.com/NadiKuts/react-native-animated-menu/blob/master/assets/qr-code.png)
 
 ... or go [here](https://expo.io/@devilsanek/animated-menu) and try it out!
-
-
-### Example
-The demo app from the GIF can be found at `examples/`.
-
-#### Using npm:
-
-```sh
-$ npm install --save <name>
-```
-
-#### Using yarn:
-
-```sh
-$ yarn add <name>
-```
-
-### Usage
-
-```jsx
-import React, { Component } from 'react';
-
-```
-
-#### Props
-
-| Prop | Type | Description |
-|---|---|---|
-|**`children`**|`ReactElement<any>`|React Element(s) to render.|
-|**`flipDuration`**|`?number`|Length of flip animation in milliseconds. _Default 280._|
-|**`renderBackface`**|`() => ReactElement<any>`|Callback that renders a backface.|
-|**`renderFrontface`**|`() => ReactElement<any>`|Callback that renders a frontface.|
-|**`renderLoading`**|`?() => ReactElement<any>`|Callback that renders a temporary view to display before base layout occurs. If not provided, `renderFrontface` is used instead.|
-
-
-
-### Instructions
-
-- [Install NodeJS](https://nodejs.org/en/)
-- [Install and setup React Native](https://facebook.github.io/react-native/docs/getting-started.html)
-- Clone repository: `git clone https://github.com/NadiKuts/react-native-pull-down.git`
-
-- Navigate to the created folder: `cd react-native-pull-down`
-
-- To run on either iPhone or Android check this page: https://github.com/react-community/create-react-native-app#creating-an-app
