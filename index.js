@@ -1,3 +1,3 @@
-import AnimatedPullDown from './lib/AnimatedPullDown';
+import AnimatedPullToRefresh from './src/AnimatedPullToRefresh';
 
-module.exports = AnimatedPullDown;
+module.exports = AnimatedPullToRefresh;

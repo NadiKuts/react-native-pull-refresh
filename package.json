@@ -1,23 +1,31 @@
 {
-	"name": "lottie_test",
-	"version": "0.0.1",
-	"private": true,
+	"name": "react-native-pull-refresh",
+	"version": "1.0.0",
+	"description": "Custom pull to refresh component for Android",
+	"main": "index.js",
 	"scripts": {
-		"start": "node node_modules/react-native/local-cli/cli.js start",
-		"test": "jest"
+		"start": "node node_modules/react-native/local-cli/cli.js start"
 	},
-	"dependencies": {
-		"lottie-react-native": "^2.2.0",
-		"react": "16.0.0-alpha.12",
-		"react-native": "0.47.1"
+	"author": "Nadezhda Kutsenko",
+	"license": "MIT",
+	"homepage": "https://github.com/NadiKuts/react-native-pull-refresh",
+	"keywords": [
+		"react-native",
+		"react-component",
+		"android",
+		"animated",
+		"pull to refresh"
+	],
+	"bugs": {
+		"url": "https://github.com/NadiKuts/react-native-pull-refresh/issues"
 	},
 	"devDependencies": {
 		"babel-jest": "20.0.3",
 		"babel-preset-react-native": "3.0.0",
 		"jest": "20.0.4",
-		"react-test-renderer": "16.0.0-alpha.12"
-	},
-	"jest": {
-		"preset": "react-native"
+		"react-test-renderer": "16.0.0-alpha.12",
+		"lottie-react-native": "^2.2.0",
+		"react": "16.0.0-alpha.12",
+		"react-native": "0.47.1"
 	}
 }

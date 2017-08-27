@@ -10,7 +10,7 @@ import {
 
 import Animation from 'lottie-react-native';
 
-class AnimatedPTR extends React.Component {
+class AnimatedPullToRefresh extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -18,8 +18,6 @@ class AnimatedPTR extends React.Component {
       refreshHeight: new Animated.Value(0),
       currentY : 0,
       isScrollFree: false,
-
-      isAnimatedEnded: false,
 
       isRefreshAnimationStarted: false,
       isRefreshAnimationEnded: false,
@@ -41,22 +39,22 @@ class AnimatedPTR extends React.Component {
     */
     isRefreshing : React.PropTypes.bool.isRequired,
     /**
-    * Sets pull distance for how far the Y axis needs to be pulled before a refresh event is triggered
+    * Pull Distance
     * @type {Integer}
     */
     pullHeight : React.PropTypes.number,
     /**
-    * Callback for when the refreshing state occurs
+    * Callback after refresh event
     * @type {Function}
     */
     onRefresh : React.PropTypes.func.isRequired,
     /**
-    * The content view which should be passed in as a scrollable type (i.e ScrollView or ListView)
+    * The content: ScrollView or ListView
     * @type {Object}
     */
     contentView: React.PropTypes.object.isRequired,
     /**
-    * The content view's background color, not to be mistaken with the content component's background color
+    * Background color
     * @type {string}
     */
     animationBackgroundColor: React.PropTypes.string,
@@ -73,7 +71,6 @@ class AnimatedPTR extends React.Component {
   }
 
   componentWillMount() {
-    //Android does not allow for negative scroll, so we have to listen to the scroll values ourselves (at least initially)
     this._panResponder = PanResponder.create({
       onStartShouldSetPanResponder: this._handleStartShouldSetPanResponder.bind(this),
       onMoveShouldSetPanResponder: this._handleMoveShouldSetPanResponder.bind(this),
@@ -87,13 +84,6 @@ class AnimatedPTR extends React.Component {
     if(this.props.isRefreshing !== props.isRefreshing) {
       // Finish the animation and set refresh panel height to 0
       if(!props.isRefreshing) {
-        Animated.spring(this.state.refreshHeight, {
-          toValue: 0,
-          bounciness: 12
-        }).start(() => {
-          this.state.initAnimationProgress.setValue(0);
-          this.setState({isAnimatedEnded: false});
-        })
       }
     }
   }
@@ -128,9 +118,14 @@ class AnimatedPTR extends React.Component {
           }),
           Animated.timing(this.state.initAnimationProgress, {
             toValue: 1,
-            duration: 3000
+            duration: 1000
           })
-        ]).start( )
+        ]).start( () => {
+           this.state.initAnimationProgress.setValue(0);
+           this.setState({isRefreshAnimationStarted: true});
+           this.onRepeatAnimation();
+
+         } )
       } else if(this.state.refreshHeight._value <= 0) {
         Animated.spring(this.state.refreshHeight, {
           toValue: 0
@@ -144,19 +139,19 @@ class AnimatedPTR extends React.Component {
   }
 
   onRepeatAnimation(){
-    this.state.repeatAnimationProgress.setValue(0);
+      this.state.repeatAnimationProgress.setValue(0);
 
-    Animated.timing(this.state.repeatAnimationProgress, {
-      toValue: 1,
-      duration: 200
-    }).start( () => {
-      if(this.props.isRefreshing){
-        this.onRepeatAnimation();
-      } else {
-        this.onEndAnimation();
-        this.state.repeatAnimationProgress.setValue(0);
-      }
-    })
+      Animated.timing(this.state.repeatAnimationProgress, {
+        toValue: 1,
+        duration: 1000
+      }).start( () => {
+        if(this.props.isRefreshing){
+          this.onRepeatAnimation();
+        } else {
+          this.state.repeatAnimationProgress.setValue(0);
+          this.onEndAnimation();
+        }
+      })
   }
 
   onEndAnimation(){
@@ -182,7 +177,6 @@ class AnimatedPTR extends React.Component {
 
   onScrollRelease() {
     if(!this.props.isRefreshing) {
-      this.setState({isAnimatedEnded: true});
       this.props.onRefresh();
     }
   }
@@ -217,23 +211,33 @@ class AnimatedPTR extends React.Component {
       left: 0,
       backgroundColor: this.props.animationBackgroundColor,
       width: Dimensions.get('window').width,
-      height: this.props.pullHeight + 50
+      height: this.props.pullHeight
     }
 
     return  (
       <View
-        style={{flex:1, justifyContent: 'center', backgroundColor:this.props.animationBackgroundColor}}
+        style={{flex:1, backgroundColor:this.props.animationBackgroundColor}}
         {...this._panResponder.panHandlers}
         >
           <Animation
-            style={[animationStyle, {opacity: this.state.isAnimatedEnded? 0 : 1 }]}
+            style={[animationStyle, {opacity: this.props.isRefreshing ? 0 : 1 }]}
             source={this.props.onPullAnimationSrc}
             progress={animateProgress}
           />
           <Animation
-            style={[animationStyle,{ opacity: this.state.isAnimatedEnded ? 1 : 0 }]}
+            style={[animationStyle,{ opacity: (this.props.isRefreshing && !this.state.isRefreshAnimationStarted) ? 1 : 0 }]}
             source={this.props.onStartRefreshAnimationSrc}
             progress={this.state.initAnimationProgress}
+          />
+          <Animation
+            style={[animationStyle,{ opacity: this.state.isRefreshAnimationStarted && !this.state.isRefreshAnimationEnded ? 1 : 0 }]}
+            source={this.props.onRefreshAnimationSrc}
+            progress={this.state.repeatAnimationProgress}
+          />
+          <Animation
+            style={[animationStyle,{ opacity: this.state.isRefreshAnimationEnded ? 1 : 0 }]}
+            source={this.props.onEndRefreshAnimationSrc}
+            progress={this.state.finalAnimationProgress}
           />
 
           <ScrollView ref='scrollComponentRef'
@@ -254,4 +258,4 @@ class AnimatedPTR extends React.Component {
       }
     }
 
-    module.exports = AnimatedPTR;
+    module.exports = AnimatedPullToRefresh;
