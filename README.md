@@ -26,7 +26,9 @@ $ npm install --save react-native-pull-refresh
 $ yarn add react-native-pull-refresh
 ```
 
-2. Install and link Lottie package (required for actual animation objects):
+2. Install and link the Lottie package (renders Adobe After Effect animations):
+https://github.com/airbnb/lottie-react-native
+
 ```sh
 yarn add lottie-react-native
 # or
