@@ -8,7 +8,9 @@ Inspired by the shots from the author: https://dribbble.com/yupnguyen
 
 ### Description
 
-Currently, react-native provides RefreshControl out of the box https://facebook.github.io/react-native/docs/refreshcontrol.html. However, it is not 'yet' possible to override the animation that runs during refreshing phase. (RefreshControl uses standard circle android animation). 
+Currently, react-native provides RefreshControl out of the box https://facebook.github.io/react-native/docs/refreshcontrol.html. 
+
+However, it is not 'yet' possible to override the animation that runs during refreshing phase. (RefreshControl uses standard circle android animation). 
 
 This package aims to fill this gap and provide a 'relatively' easy way to add your own custom animation. 
 
@@ -34,7 +36,7 @@ react-native link lottie-react-native
 
 ### Usage
 
-This code is taken from `examples/weatherAnimation` sample
+This code is taken from `examples/SimpleAnimations/weatherAnimation` sample
 
 You can find `< Header />` and `< ScrollItem />` components in the sample folder
 
