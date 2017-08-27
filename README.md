@@ -8,14 +8,9 @@ Inspired by the shots from the author: https://dribbble.com/yupnguyen
 
 ### Description
 
-Currently, react-native provides RefreshControl out of the box https://facebook.github.io/react-native/docs/refreshcontrol.html 
-However, it is not 'yet' possible to override the animation that runs during refreshing phase. (RefreshControl uses standard circle android animation). 
+Currently, react-native provides RefreshControl out of the box https://facebook.github.io/react-native/docs/refreshcontrol.html. However, it is not 'yet' possible to override the animation that runs during refreshing phase. (RefreshControl uses standard circle android animation). 
 
 This package aims to fill this gap and provide a 'relatively' easy way to add your own custom animation. 
-
-### Example
-The demo app with umbrella animation can be found at `examples/`.
-
 
 ### Installation
 
@@ -39,7 +34,7 @@ react-native link lottie-react-native
 
 ### Usage
 
-This code is taken from examples/weatherAnimation sample
+This code is taken from `examples/weatherAnimation` sample
 
 You can find `< Header />` and `< ScrollItem />` components in the sample folder
 
@@ -99,7 +94,7 @@ export default class weatherAnimation extends Component {
 }
 ```
 
-### Animation Files Format
+#### Animation Files Format
 Lottie JSON - https://github.com/airbnb/lottie-react-native
 
 Lottie is a mobile library, developed by AirBnB for Android and iOS that parses Adobe After Effects animations exported as JSON with bodymovin and renders them natively on mobile.
@@ -122,13 +117,14 @@ You can find file examples in `examples/SimpleAnimations/animations` folder
 #### Animation Source Files Props
 
 | Prop | Description |
-|---|---|---|
+|---|---|
 |**`onPullAnimationSrc`**|Animation that runs when scroll view is pulled down|
 |**`onStartRefreshAnimationSrc`**|Animation that runs after view was pulled and released|
 |**`onRefreshAnimationSrc`**|Animation that runs continuously until isRefreshing props is not changed|
 |**`onEndRefreshAnimationSrc`**|Animation that runs after isRefreshing props is changed|
 
 ### Demos
+The demo app with umbrella animation can be found at `examples/SimpleAnimations`.
 
 Install Expo App on your [Android smartphone](https://play.google.com/store/apps/details?id=host.exp.exponent&referrer=www) or [iPhone](https://itunes.apple.com/app/apple-store/id982107779?ct=www&mt=8).
 
