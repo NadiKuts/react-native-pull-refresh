@@ -136,3 +136,8 @@ Scan this QR-code with your Expo App.
 ![alt text](https://github.com/NadiKuts/react-native-pull-refresh/blob/master/examples/SimpleAnimations/resources/scan.png)
 
 ... or go [here](https://expo.io/@devilsanek/animated-pull-to-refresh) and try it out!
+
+
+### Contribution / Issues
+
+Are very welcome! :)
