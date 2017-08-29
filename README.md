@@ -121,10 +121,10 @@ You can find file examples in `examples/SimpleAnimations/animations` folder
 
 | Prop | Description |
 |---|---|
-|**`onPullAnimationSrc`**|Animation that runs when scroll view is pulled down|
-|**`onStartRefreshAnimationSrc`**|Animation that runs after view was pulled and released|
-|**`onRefreshAnimationSrc`**|Animation that runs continuously until isRefreshing props is not changed|
-|**`onEndRefreshAnimationSrc`**|Animation that runs after isRefreshing props is changed|
+|**`onPullAnimationSrc`**|Animation JSON that runs when scroll view is pulled down|
+|**`onStartRefreshAnimationSrc`**|Animation JSON that runs after view was pulled and released|
+|**`onRefreshAnimationSrc`**|Animation JSON that runs continuously until isRefreshing props is not changed|
+|**`onEndRefreshAnimationSrc`**|Animation JSON that runs after isRefreshing props is changed|
 
 ### Demo
 The demo app can be found at `examples/SimpleAnimations`.
