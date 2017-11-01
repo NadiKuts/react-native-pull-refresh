@@ -8,6 +8,7 @@ import {
   Dimensions
 } from 'react-native'
 
+import PropTypes from 'prop-types';
 import Animation from 'lottie-react-native';
 
 class AnimatedPullToRefresh extends React.Component {
@@ -37,32 +38,32 @@ class AnimatedPullToRefresh extends React.Component {
     * Refresh state set by parent to trigger refresh
     * @type {Boolean}
     */
-    isRefreshing : React.PropTypes.bool.isRequired,
+    isRefreshing : PropTypes.bool.isRequired,
     /**
     * Pull Distance
     * @type {Integer}
     */
-    pullHeight : React.PropTypes.number,
+    pullHeight : PropTypes.number,
     /**
     * Callback after refresh event
     * @type {Function}
     */
-    onRefresh : React.PropTypes.func.isRequired,
+    onRefresh : PropTypes.func.isRequired,
     /**
     * The content: ScrollView or ListView
     * @type {Object}
     */
-    contentView: React.PropTypes.object.isRequired,
+    contentView: PropTypes.object.isRequired,
     /**
     * Background color
     * @type {string}
     */
-    animationBackgroundColor: React.PropTypes.string,
+    animationBackgroundColor: PropTypes.string,
     /**
     * Custom onScroll event
     * @type {Function}
     */
-    onScroll: React.PropTypes.func
+    onScroll: PropTypes.func
   }
 
   static defaultProps = {
