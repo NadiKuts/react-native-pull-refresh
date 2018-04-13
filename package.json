@@ -19,7 +19,7 @@
   "bugs": {
     "url": "https://github.com/NadiKuts/react-native-pull-refresh/issues"
   },
-  "devDependencies": {
+  "dependencies": {
     "react-test-renderer": "16.0.0",
     "lottie-react-native": "2.2.0",
     "react": "16.0.0",
