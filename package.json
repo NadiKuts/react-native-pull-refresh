@@ -19,14 +19,16 @@
   "bugs": {
     "url": "https://github.com/NadiKuts/react-native-pull-refresh/issues"
   },
+  "dependencies": {
+    "react-test-renderer": "16.0.0",
+    "lottie-react-native": "2.2.0",
+    "react": "16.0.0",
+    "react-native": "0.55.0",
+    "prop-types": "^15.6.1"
+  },
   "devDependencies": {
     "babel-jest": "20.0.3",
     "babel-preset-react-native": "3.0.0",
     "jest": "20.0.4",
-    "react-test-renderer": "16.0.0",
-    "lottie-react-native": "2.2.0",
-    "react": "16.0.0",
-    "react-native": "0.47.1",
-    "prop-types": "15.6.0"
   }
 }
