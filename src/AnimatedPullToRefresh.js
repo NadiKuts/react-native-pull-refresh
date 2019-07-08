@@ -9,7 +9,6 @@ import {
   Dimensions,
 } from 'react-native';
 
-import PropTypes from 'prop-types';
 import Animation from 'lottie-react-native';
 
 class AnimatedPullToRefresh extends React.Component {
