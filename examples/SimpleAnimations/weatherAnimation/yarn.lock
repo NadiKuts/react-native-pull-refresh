@@ -875,6 +875,10 @@ base64-url@1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/base64-url/-/base64-url-1.2.1.tgz#199fd661702a0e7b7dcae6e0698bb089c52f6d78"
 
+base64-url@^2.0.0:
+  version "2.3.2"
+  resolved "https://registry.yarnpkg.com/base64-url/-/base64-url-2.3.2.tgz#d7ea32e80ce3c3ad49f823e77c4dd247c6b81759"
+
 base@^0.11.1:
   version "0.11.2"
   resolved "https://registry.yarnpkg.com/base/-/base-0.11.2.tgz#7bde5ced145b6d551a90db87f83c558b4eb48a8f"
