@@ -1,296 +1,239 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import {
-  View,
-  ScrollView,
-  Animated,
-  PanResponder,
-  UIManager,
-  Dimensions,
-} from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, ScrollView, Animated, PanResponder, UIManager, Dimensions } from 'react-native';
 
 import Animation from 'lottie-react-native';
 
-class AnimatedPullToRefresh extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      scrollY: new Animated.Value(0),
-      refreshHeight: new Animated.Value(0),
-      currentY: 0,
-      isScrollFree: false,
+const AnimatedPullToRefresh = ({
+	isRefreshing,
+	onRefresh,
+	pullHeight = 180,
+	animationBackgroundColor = 'white',
+	onPullAnimationSrc,
+	onStartRefreshAnimationSrc,
+	onRefreshAnimationSrc,
+	onEndRefreshAnimationSrc,
+	children,
+}) => {
+	const [_state, _setState] = useState({
+		currentY: 0,
+		isScrollFree: false,
+		isRefreshAnimationStarted: false,
+		isRefreshAnimationEnded: false,
+	});
+	const [_animationCount, _setAnimationCount] = useState(0);
+	const scrollY = useRef(new Animated.Value(0)).current;
+	const refreshHeight = useRef(new Animated.Value(0)).current;
+	const initAnimationProgress = useRef(new Animated.Value(0)).current;
+	const repeatAnimationProgress = useRef(new Animated.Value(0)).current;
+	const finalAnimationProgress = useRef(new Animated.Value(0)).current;
 
-      isRefreshAnimationStarted: false,
-      isRefreshAnimationEnded: false,
-      initAnimationProgress: new Animated.Value(0),
-      repeatAnimationProgress: new Animated.Value(0),
-      finalAnimationProgress: new Animated.Value(0),
-    };
+	const scrollComponentRef = useRef(null);
+	const _panResponder = useRef(null);
 
-    this.onRepeatAnimation = this.onRepeatAnimation.bind(this);
-    this.onEndAnimation = this.onEndAnimation.bind(this);
+	useEffect(() => {
+		_panResponder.current = PanResponder.create({
+			onStartShouldSetPanResponder: _handleStartShouldSetPanResponder,
+			onMoveShouldSetPanResponder: _handleMoveShouldSetPanResponder,
+			onPanResponderMove: _handlePanResponderMove,
+			onPanResponderRelease: _handlePanResponderEnd,
+			onPanResponderTerminate: _handlePanResponderEnd,
+		});
+		UIManager.setLayoutAnimationEnabledExperimental && UIManager.setLayoutAnimationEnabledExperimental(true);
+	}, []);
 
-    UIManager.setLayoutAnimationEnabledExperimental &&
-      UIManager.setLayoutAnimationEnabledExperimental(true);
-  }
+	const _handleStartShouldSetPanResponder = (e, gestureState) => {
+		return !_state.isScrollFree;
+	};
 
-  static propTypes = {
-    /**
-     * Refresh state set by parent to trigger refresh
-     * @type {Boolean}
-     */
-    isRefreshing: PropTypes?.bool.isRequired,
-    /**
-     * Pull Distance
-     * @type {Integer}
-     */
-    pullHeight: PropTypes?.number,
-    /**
-     * Callback after refresh event
-     * @type {Function}
-     */
-    onRefresh: PropTypes?.func.isRequired,
-    /**
-     * The content: ScrollView or ListView
-     * @type {Object}
-     */
-    contentView: PropTypes?.object.isRequired,
-    /**
-     * Background color
-     * @type {string}
-     */
-    animationBackgroundColor: PropTypes?.string,
-    /**
-     * Custom onScroll event
-     * @type {Function}
-     */
-    onScroll: PropTypes.func,
-  };
+	const _handleMoveShouldSetPanResponder = (e, gestureState) => {
+		return !_state.isScrollFree;
+	};
 
-  static defaultProps = {
-    pullHeight: 180,
-    animationBackgroundColor: 'white',
-  };
+	//if the content scroll value is at 0, we allow for a pull to refresh
+	const _handlePanResponderMove = (e, gestureState) => {
+		if (!isRefreshing) {
+			if ((gestureState.dy >= 0 && scrollY?._value === 0) || refreshHeight?._value > 0) {
+				refreshHeight?.setValue(-1 * gestureState.dy * 0.5);
+			} else {
+				// Native android scrolling
+				scrollComponentRef?.current?.scrollTo({
+					y: -1 * gestureState.dy,
+					animated: true,
+				});
+			}
+		}
+	};
 
-  componentWillMount() {
-    this._panResponder = PanResponder.create({
-      onStartShouldSetPanResponder: this._handleStartShouldSetPanResponder.bind(
-        this,
-      ),
-      onMoveShouldSetPanResponder: this._handleMoveShouldSetPanResponder.bind(
-        this,
-      ),
-      onPanResponderMove: this._handlePanResponderMove.bind(this),
-      onPanResponderRelease: this._handlePanResponderEnd.bind(this),
-      onPanResponderTerminate: this._handlePanResponderEnd.bind(this),
-    });
-  }
+	const _handlePanResponderEnd = (e, gestureState) => {
+		if (!isRefreshing) {
+			if (refreshHeight?._value <= -pullHeight) {
+				onScrollRelease();
+				Animated.parallel([
+					Animated.spring(refreshHeight, {
+						toValue: -pullHeight,
+						useNativeDriver: false,
+					}),
+					Animated.timing(initAnimationProgress, {
+						useNativeDriver: false,
+						toValue: 1,
+						duration: 1000,
+					}),
+				]).start(() => {
+					initAnimationProgress?.setValue(0);
+					_setState({
+						..._state,
+						isRefreshAnimationStarted: true,
+						isRefreshAnimationEnded: false,
+					});
+					onRepeatAnimation();
+				});
+			} else if (refreshHeight?._value <= 0) {
+				Animated.spring(refreshHeight, {
+					toValue: 0,
+					useNativeDriver: false,
+				}).start();
+			}
 
-  componentWillReceiveProps(props) {
-    if (this.props.isRefreshing !== props.isRefreshing) {
-      // Finish the animation and set refresh panel height to 0
-      if (!props.isRefreshing) {
-      }
-    }
-  }
+			if (scrollY?._value > 0) {
+				_setState({ ..._state, isScrollFree: true });
+			}
+		}
+	};
+	useEffect(() => {
+		if (!_state.isRefreshAnimationStarted && isRefreshing) {
+			refreshHeight.setValue(-pullHeight);
+			repeatAnimationProgress?.setValue(1);
+			_setState({
+				..._state,
+				isRefreshAnimationStarted: true,
+				isRefreshAnimationEnded: false,
+			});
+			onRepeatAnimation();
+		}
+	}, [_state.isRefreshAnimationStarted, isRefreshing]);
+	useEffect(() => onRepeatAnimation(), [_animationCount]);
 
-  _handleStartShouldSetPanResponder(e, gestureState) {
-    return !this.state.isScrollFree;
-  }
+	const onRepeatAnimation = () => {
+		repeatAnimationProgress?.setValue(0);
+		Animated.timing(repeatAnimationProgress, {
+			useNativeDriver: false,
+			toValue: 1,
+			duration: 1000,
+		}).start(() => {
+			if (isRefreshing) {
+				_setAnimationCount((cc) => cc + 1);
+			} else {
+				repeatAnimationProgress?.setValue(0);
+				onEndAnimation();
+			}
+		});
+	};
 
-  _handleMoveShouldSetPanResponder(e, gestureState) {
-    return !this.state.isScrollFree;
-  }
+	const onEndAnimation = () => {
+		_setState({ ..._state, isRefreshAnimationEnded: true });
+		Animated.sequence([
+			Animated.timing(finalAnimationProgress, {
+				useNativeDriver: false,
+				toValue: 1,
+				duration: 1000,
+			}),
+			Animated.spring(refreshHeight, {
+				useNativeDriver: false,
+				toValue: 0,
+				bounciness: 12,
+			}),
+		]).start(() => {
+			finalAnimationProgress?.setValue(0);
+			_setState({
+				..._state,
+				isRefreshAnimationEnded: false,
+				isRefreshAnimationStarted: false,
+			});
+		});
+	};
 
-  // if the content scroll value is at 0, we allow for a pull to refresh
-  _handlePanResponderMove(e, gestureState) {
-    if (!this.props.isRefreshing) {
-      if (
-        (gestureState.dy >= 0 && this.state.scrollY._value === 0) ||
-        this.state.refreshHeight._value > 0
-      ) {
-        this.state.refreshHeight.setValue(-1 * gestureState.dy * 0.5);
-      } else {
-        // Native android scrolling
-        this.refs.scrollComponentRef.scrollTo({
-          y: -1 * gestureState.dy,
-          animated: true,
-        });
-      }
-    }
-  }
+	const onScrollRelease = () => {
+		if (!isRefreshing) {
+			onRefresh();
+		}
+	};
 
-  _handlePanResponderEnd(e, gestureState) {
-    if (!this.props.isRefreshing) {
-      if (this.state.refreshHeight._value <= -this.props.pullHeight) {
-        this.onScrollRelease();
-        Animated.parallel([
-          Animated.spring(this.state.refreshHeight, {
-            toValue: -this.props.pullHeight,
-          }),
-          Animated.timing(this.state.initAnimationProgress, {
-            toValue: 1,
-            duration: 1000,
-          }),
-        ]).start(() => {
-          this.state.initAnimationProgress.setValue(0);
-          this.setState({isRefreshAnimationStarted: true});
-          this.onRepeatAnimation();
-        });
-      } else if (this.state.refreshHeight._value <= 0) {
-        Animated.spring(this.state.refreshHeight, {
-          toValue: 0,
-        }).start();
-      }
+	const isScrolledToTop = () => {
+		if (scrollY?._value === 0 && _state.isScrollFree) {
+			_setState({ ..._state, isScrollFree: false });
+		}
+	};
+	let onScrollEvent = (event) => {
+		scrollY?.setValue(event.nativeEvent.contentOffset.y);
+	};
 
-      if (this.state.scrollY._value > 0) {
-        this.setState({isScrollFree: true});
-      }
-    }
-  }
+	let animateHeight = refreshHeight?.interpolate({
+		inputRange: [-pullHeight, 0],
+		outputRange: [pullHeight, 0],
+	});
 
-  onRepeatAnimation() {
-    this.state.repeatAnimationProgress.setValue(0);
+	let animateProgress = refreshHeight?.interpolate({
+		inputRange: [-pullHeight, 0],
+		outputRange: [1, 0],
+		extrapolate: 'clamp',
+	});
 
-    Animated.timing(this.state.repeatAnimationProgress, {
-      toValue: 1,
-      duration: 1000,
-    }).start(() => {
-      if (this.props.isRefreshing) {
-        this.onRepeatAnimation();
-      } else {
-        this.state.repeatAnimationProgress.setValue(0);
-        this.onEndAnimation();
-      }
-    });
-  }
+	const animationStyle = {
+		position: 'absolute',
+		top: 0,
+		bottom: 0,
+		right: 0,
+		left: 0,
+		backgroundColor: animationBackgroundColor,
+		width: Dimensions.get('window').width,
+		height: pullHeight,
+	};
 
-  onEndAnimation() {
-    this.setState({isRefreshAnimationEnded: true});
-    Animated.sequence([
-      Animated.timing(this.state.finalAnimationProgress, {
-        toValue: 1,
-        duration: 1000,
-      }),
-      Animated.spring(this.state.refreshHeight, {
-        toValue: 0,
-        bounciness: 12,
-      }),
-    ]).start(() => {
-      this.state.finalAnimationProgress.setValue(0);
-      this.setState({
-        isRefreshAnimationEnded: false,
-        isRefreshAnimationStarted: false,
-      });
-    });
-  }
+	return (
+		<View style={{ backgroundColor: animationBackgroundColor }} {..._panResponder?.current?.panHandlers}>
+			<Animation style={[animationStyle, { opacity: isRefreshing ? 0 : 1 }]} source={onPullAnimationSrc} progress={animateProgress} />
+			<Animation
+				style={[
+					animationStyle,
+					{
+						opacity: isRefreshing && !_state.isRefreshAnimationStarted ? 1 : 0,
+					},
+				]}
+				source={onStartRefreshAnimationSrc}
+				progress={initAnimationProgress}
+			/>
+			<Animation
+				style={[
+					animationStyle,
+					{
+						opacity: _state.isRefreshAnimationStarted && !_state.isRefreshAnimationEnded ? 1 : 0,
+					},
+				]}
+				source={onRefreshAnimationSrc}
+				progress={repeatAnimationProgress}
+			/>
+			<Animation style={[animationStyle, { opacity: _state.isRefreshAnimationEnded ? 1 : 0 }]} source={onEndRefreshAnimationSrc} progress={finalAnimationProgress} />
 
+			<ScrollView
+				keyboardShouldPersistTaps="handled"
+				ref={scrollComponentRef}
+				scrollEnabled={_state.isScrollFree}
+				onScroll={onScrollEvent}
+				onTouchEnd={() => {
+					isScrolledToTop();
+				}}
+				onScrollEndDrag={() => {
+					isScrolledToTop();
+				}}>
+				<Animated.View style={{ marginTop: animateHeight }}>
+					{React.cloneElement(children, {
+						scrollEnabled: false,
+						ref: scrollComponentRef,
+					})}
+				</Animated.View>
+			</ScrollView>
+		</View>
+	);
+};
 
-  onScrollRelease() {
-    if (!this.props.isRefreshing) {
-      this.props.onRefresh();
-    }
-  }
-
-  isScrolledToTop() {
-    if (this.state.scrollY._value === 0 && this.state.isScrollFree) {
-      this.setState({isScrollFree: false});
-    }
-  }
-
-  render() {
-    const onScrollEvent = event => {
-      this.state.scrollY.setValue(event.nativeEvent.contentOffset.y);
-    };
-
-    const animateHeight = this.state.refreshHeight.interpolate({
-      inputRange: [-this.props.pullHeight, 0],
-      outputRange: [this.props.pullHeight, 0],
-    });
-
-    const animateProgress = this.state.refreshHeight.interpolate({
-      inputRange: [-this.props.pullHeight, 0],
-      outputRange: [1, 0],
-      extrapolate: 'clamp',
-    });
-
-    const animationStyle = {
-      position: 'absolute',
-      top: 0,
-      bottom: 0,
-      right: 0,
-      left: 0,
-      backgroundColor: this.props.animationBackgroundColor,
-      width: Dimensions.get('window').width,
-      height: this.props.pullHeight,
-    };
-
-    return (
-      <View
-        style={{flex: 1, backgroundColor: this.props.animationBackgroundColor}}
-        {...this._panResponder.panHandlers}
-        >
-        <Animation
-          style={[animationStyle, {opacity: this.props.isRefreshing ? 0 : 1}]}
-          source={this.props.onPullAnimationSrc}
-          progress={animateProgress}
-        />
-        <Animation
-          style={[
-            animationStyle,
-            {
-              opacity:
-                this.props.isRefreshing && !this.state.isRefreshAnimationStarted
-                  ? 1
-                  : 0,
-            },
-          ]}
-          source={this.props.onStartRefreshAnimationSrc}
-          progress={this.state.initAnimationProgress}
-        />
-        <Animation
-          style={[
-            animationStyle,
-            {
-              opacity:
-                this.state.isRefreshAnimationStarted &&
-                !this.state.isRefreshAnimationEnded
-                  ? 1
-                  : 0,
-            },
-          ]}
-          source={this.props.onRefreshAnimationSrc}
-          progress={this.state.repeatAnimationProgress}
-        />
-        <Animation
-          style={[
-            animationStyle,
-            {opacity: this.state.isRefreshAnimationEnded ? 1 : 0},
-          ]}
-          source={this.props.onEndRefreshAnimationSrc}
-          progress={this.state.finalAnimationProgress}
-        />
-
-        <ScrollView
-                    ref="scrollComponentRef"
-          scrollEnabled={this.state.isScrollFree}
-          onScroll={onScrollEvent}
-          onTouchEnd={() => {
-            this.isScrolledToTop();
-          }}
-          onScrollEndDrag={() => {
-            this.isScrolledToTop();
-          }}>
-          <Animated.View style={{marginTop: animateHeight}}>
-            {React.cloneElement(this.props.contentView, {
-              scrollEnabled: false,
-              ref: 'scrollComponentRef',
-            })}
-          </Animated.View>
-        </ScrollView>
-      </View>
-    );
-  }
-}
-
-module.exports = AnimatedPullToRefresh;
+export default AnimatedPullToRefresh;
